@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>コヨーテ(coyote) ONLINE</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id='app2'>
+      <input id="cName_inp" placeholder="ニックネームを入力してください"><br/>
+      <br/>
+      <button id='createGame'>ゲームを作る(Make a Game)</button><br/>
+      Game ID: <span id='gId'></span><br/>
+      Game Status: <span id='gStatus'></span><br/>
+      <hr/>
+      <button id="joinGame">ゲームに参加する(Join the Game)</button><br/>
+      <input id="gId_inp" placeholder="GameIDを入力してください"><br/>
+      Your ID: <span id='cId'></span><br/>
+      Your Name: <span id='cName'></span><br/>
+      <hr/>
+      <h2>Member Applying</h2>
+      <span id='applyingList'></span>
+      <br/>
+      <div id='sec1' style='display:none'>
+        <hr/>
+        <button id="startGame">ゲームを始める(Let's start the Game)</button><br/>
+      </div>
+      <div id='sec2' style='display:none'>
+        <h2>Member Rotation</h2>
+        <span id='routeList'></span>
+        <hr/>
+        Your Turn: <span id='yTurn'></span><br/>
+        <hr/>
+        now Answer:<span id='answernum'></span><br/>
+        <h2><span id='coyoteflg'></span></h2><br/>
+        <br/>
+        Game Cards:<br/>
+        <span id='gamecards'></span><br/>
+        <hr/>
+        <button id="coyote">コヨーテ!!(say to coyote)</button><br/>
+        <hr/>
+      </div>
+      <div id='sec3' style='display:none'>
+        <input id="cardNum_inp" placeholder="番号を入力してください"><br/>
+        <button id="answer">回答する(Answer)</button><br/>
+      </div>
+      <br/>
+      <span id='message'></span><br/>
+    </div>
+
+    <script>
+    var timeout = 1000;
+    var timer = '';
+
+    $(function() {
+      var gId = '';
+      var cId = '';
+
+      // Create Game
+      $('#createGame').click(function() {
+        $('#message').empty();
+        $.ajax('create' + '/' + $('#cName_inp').val(),
+          {
+            type: 'get',
+          }
+        )
+        .done(function(data) {
+          $('#gId').text(data);
+          $('#cId').text(data);
+          $('#cName').text($('#cName_inp').val());
+          $('#gStatus').text('waiting');
+          gId = data;
+          cId = data;
+          $('#sec1').show();
+          timer = setTimeout(status_check(gId, cId), timeout)
+        })
+        .fail(function() {
+          $('#message').text('エラーが発生しました');
+        });
+      });
+
+      // Join Game
+      $('#joinGame').click(function() {
+        $('#message').empty();
+        $.ajax($('#gId_inp').val() + '/join/' + $('#cName_inp').val(),
+          {
+            type: 'get',
+          }
+        )
+        .done(function(data) {
+          _tmp = data.split(' ,');
+          $('#cId').text(_tmp[0]);
+          $('#cName').text(_tmp[1]);
+          $('#gStatus').text(_tmp[2]);
+          gId = $('#gId_inp').val();
+          cId = _tmp[0];
+          timer = setTimeout(status_check(gId, cId), timeout)
+        })
+        .fail(function() {
+          $('#message').text('エラーが発生しました');
+        });
+      });
+
+      // Start Game
+      $('#startGame').click(function() {
+        $('#message').empty();
+        $.getJSON(gId + '/start',
+          {
+            type: 'get',
+          }
+        )
+        .done(function(data) {
+        })
+        .fail(function() {
+          $('#message').text('エラーが発生しました');
+        });
+      });
+
+      // answer
+      $('#answer').click(function() {
+        $('#message').empty();
+        // put your card
+        $.ajax(gId + '/' + cId + '/set/' + $('#cardNum_inp').val(),
+          {
+            type: 'get',
+          }
+        )
+        .done(function(data) {
+          $('#message').text(data);
+        })
+        .fail(function() {
+          $('#message').text('エラーが発生しました');
+        });
+        $('#cardNum_inp').val('')
+      });
+
+      // say to coyote
+      $('#coyote').click(function() {
+        $('#message').empty();
+        // put your card
+        $.ajax(gId + '/' + '/coyote',
+          {
+            type: 'get',
+          }
+        )
+        .done(function(data) {
+          $('#message').text(data);
+        })
+        .fail(function() {
+          $('#message').text('エラーが発生しました');
+        });
+      });
+    });
+
+    var status_check = function(gId, cId){
+      setTimeout(function(){
+        $('#message').empty();
+        // all status
+        $.getJSON(gId + '/status',
+          {
+            type: 'get',
+          }
+        )
+        .done(function(data) {
+          console.log(data)
+          $('#gStatus').text(data.status);
+          playerPos = 0;
+
+          // Applying List
+          $('#applyingList').empty();
+          for(var pIdx in data.players){
+            // console.log(data.players[pIdx])
+            $('#applyingList').append(data.players[pIdx].nickname + '(' + data.players[pIdx].playerid + ')' + ',');
+            if(cId == data.players[pIdx].playerid){
+              playerPos = pIdx;
+            }
+          }
+
+          if(data.status == 'started'){
+            $('#sec2').show()
+            // route List
+            $('#routeList').empty();
+            $('#gamecards').empty();
+            for(var rIdx in data.routelist){
+              if(data.routelist[rIdx].playerid == data.routelist[data.routeidx].playerid){
+                $('#routeList').append('<b>&gt;' + data.routelist[rIdx].nickname + '</b><br/>');
+              }else{
+                $('#routeList').append(data.routelist[rIdx].nickname + '<br/>');
+              }
+              // set the game cards
+              if(data.routelist[rIdx].playerid == cId && data.coyote == false){
+                $('#gamecards').append(data.routelist[rIdx].nickname + ': ***<br/>');
+              }else{
+                $('#gamecards').append(data.routelist[rIdx].nickname + ': ' + data.cardnames[data.routelist[rIdx].holdcard] + '<br/>');
+              }
+            }
+
+            $('#answernum').text(data.answer);
+            console.log(data.coyote);
+            if(data.coyote == true){
+              $('#coyoteflg').text('Coyote!!');
+            }
+
+            // checking turn
+            if(data.routelist[data.routeidx].playerid == cId){
+              $('#yTurn').text('your turn')
+              $('#sec3').show();
+            }else{
+              $('#yTurn').text('not your turn')
+              $('#sec3').css('display', 'none');
+            }
+          }
+        })
+        .fail(function() {
+          $('#message').text('エラーが発生しました');
+        });
+        timer = setTimeout(status_check(gId, cId), timeout)
+      }, timeout);
+    }
+
+    </script>
+  </body>
+</html>
