@@ -118,6 +118,8 @@ def start_game(gameid):
     players = game['players']
 
     for player in players:
+        if len(game['stocks'] == 0):
+            game['stocks'] = list(range(0, 35))
         player['holdcard'] = game['stocks'].pop(random.randint(0, len(game['stocks']) - 1))
 
     cache.set(gameid, game)
@@ -141,7 +143,7 @@ def setcard_game(gameid, clientid, answer):
 def coyote(gameid):
     game = cache.get(gameid)
 
-    # game['status'] = 'end'
+    game['status'] = 'end'
     game['coyote'] = True
 
     cache.set(gameid, game)

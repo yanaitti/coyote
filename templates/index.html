@@ -33,7 +33,6 @@
         <hr/>
         now Answer:<span id='answernum'></span><br/>
         <h2><span id='coyoteflg'></span></h2><br/>
-        <br/>
         Game Cards:<br/>
         <span id='gamecards'></span><br/>
         <hr/>
@@ -110,6 +109,8 @@
           }
         )
         .done(function(data) {
+          $('#gamecards').empty();
+          $('#coyoteflg').empty();
         })
         .fail(function() {
           $('#message').text('エラーが発生しました');
@@ -166,49 +167,58 @@
           $('#gStatus').text(data.status);
           playerPos = 0;
 
-          // Applying List
-          $('#applyingList').empty();
-          for(var pIdx in data.players){
-            // console.log(data.players[pIdx])
-            $('#applyingList').append(data.players[pIdx].nickname + '(' + data.players[pIdx].playerid + ')' + ',');
-            if(cId == data.players[pIdx].playerid){
-              playerPos = pIdx;
-            }
-          }
-
-          if(data.status == 'started'){
-            $('#sec2').show()
-            // route List
-            $('#routeList').empty();
-            $('#gamecards').empty();
-            for(var rIdx in data.routelist){
-              if(data.routelist[rIdx].playerid == data.routelist[data.routeidx].playerid){
-                $('#routeList').append('<b>&gt;' + data.routelist[rIdx].nickname + '</b><br/>');
-              }else{
-                $('#routeList').append(data.routelist[rIdx].nickname + '<br/>');
+          switch(data.status){
+            case 'waiting':
+              // Applying List
+              $('#applyingList').empty();
+              for(var pIdx in data.players){
+                // console.log(data.players[pIdx])
+                $('#applyingList').append(data.players[pIdx].nickname + '(' + data.players[pIdx].playerid + ')' + ',');
+                if(cId == data.players[pIdx].playerid){
+                  playerPos = pIdx;
+                }
               }
-              // set the game cards
-              if(data.routelist[rIdx].playerid == cId && data.coyote == false){
-                $('#gamecards').append(data.routelist[rIdx].nickname + ': ***<br/>');
+              break;
+
+            case 'started':
+              $('#sec2').show()
+              // route List
+              $('#routeList').empty();
+              $('#gamecards').empty();
+              for(var rIdx in data.routelist){
+                if(data.routelist[rIdx].playerid == data.routelist[data.routeidx].playerid){
+                  $('#routeList').append('<b>&gt;' + data.routelist[rIdx].nickname + '</b><br/>');
+                }else{
+                  $('#routeList').append(data.routelist[rIdx].nickname + '<br/>');
+                }
+                // set the game cards
+                if(data.routelist[rIdx].playerid == cId){
+                  $('#gamecards').append(data.routelist[rIdx].nickname + ': ***<br/>');
+                }else{
+                  $('#gamecards').append(data.routelist[rIdx].nickname + ': ' + data.cardnames[data.routelist[rIdx].holdcard] + '<br/>');
+                }
+              }
+              $('#answernum').text(data.answer);
+
+              // checking turn
+              if(data.routelist[data.routeidx].playerid == cId){
+                $('#yTurn').text('your turn')
+                $('#sec3').show();
               }else{
+                $('#yTurn').text('not your turn')
+                $('#sec3').css('display', 'none');
+              }
+              break;
+
+            case 'end':
+              $('#gamecards').empty();
+              for(var rIdx in data.routelist){
                 $('#gamecards').append(data.routelist[rIdx].nickname + ': ' + data.cardnames[data.routelist[rIdx].holdcard] + '<br/>');
               }
-            }
 
-            $('#answernum').text(data.answer);
-            console.log(data.coyote);
-            if(data.coyote == true){
+              console.log(data.coyote);
               $('#coyoteflg').text('Coyote!!');
-            }
-
-            // checking turn
-            if(data.routelist[data.routeidx].playerid == cId){
-              $('#yTurn').text('your turn')
-              $('#sec3').show();
-            }else{
-              $('#yTurn').text('not your turn')
-              $('#sec3').css('display', 'none');
-            }
+              break;
           }
         })
         .fail(function() {
