@@ -118,7 +118,7 @@ def start_game(gameid):
     players = game['players']
 
     for player in players:
-        if len(game['stocks'] == 0):
+        if len(game['stocks']) == 0:
             game['stocks'] = list(range(0, 35))
         player['holdcard'] = game['stocks'].pop(random.randint(0, len(game['stocks']) - 1))
 
