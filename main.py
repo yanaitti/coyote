@@ -53,7 +53,6 @@ def create_game(nickname):
         'status': 'waiting',
         'routeidx': 0,
         'stocks': list(range(0, 35)),
-        'answer': 0,
         'coyote': False,
         'cardnames': cardnames,
         'players': []}
@@ -109,6 +108,7 @@ def join_game(gameid, nickname='default'):
 def start_game(gameid):
     game = cache.get(gameid)
     game['status'] = 'started'
+    game['answer'] = 0
 
     # playerids = [player['playerid'] for player in game['players']]
     routelist = copy.copy(game['players'])
