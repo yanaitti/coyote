@@ -113,7 +113,6 @@
         )
         .done(function(data) {
           $('#gamecards').empty();
-          $('#coyoteflg').empty();
         })
         .fail(function() {
           $('#message').text('エラーが発生しました');
@@ -188,6 +187,7 @@
               // route List
               $('#routeList').empty();
               $('#gamecards').empty();
+              $('#coyoteflg').empty();
               for(var rIdx in data.routelist){
                 if(data.routelist[rIdx].playerid == data.routelist[data.routeidx].playerid){
                   $('#routeList').append('<b>&gt;' + data.routelist[rIdx].nickname + '</b><br/>');
