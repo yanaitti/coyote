@@ -1,4 +1,4 @@
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 from flask_babel import Babel, gettext
 from flask_caching import Cache
 import uuid
