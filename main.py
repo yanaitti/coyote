@@ -1,4 +1,5 @@
 from flask import Flask, Response, render_template
+from flask_babel import Babel, gettext
 from flask_caching import Cache
 import uuid
 import random
@@ -8,6 +9,14 @@ import os
 import copy
 
 app = Flask(__name__)
+babel = Babel(app) # Babelオブジェクトを作っておく
+
+
+@babel.localeselector
+def get_locale():
+    # この場合はブラウザのAccept Languagesを見るようになっている。
+    return request.accept_languages.best_match(['ja', 'ja_JP', 'en'])
+
 
 '''
 カード枚数：35枚

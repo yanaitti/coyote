@@ -38,14 +38,14 @@
         Game Cards:<br/>
         <span id='gamecards'></span><br/>
         <hr/>
-        <button id="coyote">コヨーテ!!(say to coyote)</button><br/>
-        場に出ているカードより多いと思ったら、「コヨーテ!!」ボタンを押してください。<br/>
+        <button id="coyote">{{ gettext('btn_coyote') }}</button><br/>
+        {{ gettext('txt_explain1') }}<br/>
         <hr/>
       </div>
       <div id='sec3' style='display:none'>
-        <input id="cardNum_inp" placeholder="番号を入力してください"><br/>
-        <button id="answer">回答する(Answer)</button><br/>
-        あなたの番です、場に出ている数字を参考に、前の数字より大きい数字を入力して「回答する」ボタンを押してください。<br/>
+        <input id="cardNum_inp" placeholder="{{ gettext('txt_inputnumber') }}"><br/>
+        <button id="answer">{{ gettext('btn_answer') }}</button><br/>
+        {{ gettext('txt_explain2') }}<br/>
       </div>
       <br/>
       <span id='message'></span><br/>
