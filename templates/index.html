@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>コヨーテ(coyote) ONLINE</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <meta name="viewport" content="width=device-width,initial-scale=1">
   </head>
   <body>
@@ -142,7 +144,7 @@
       $('#coyote').click(function() {
         $('#message').empty();
         // put your card
-        $.ajax(gId + '/coyote',
+        $.ajax(gId + '/' + cId + '/coyote',
           {
             type: 'get',
           }
@@ -170,19 +172,16 @@
           $('#gStatus').text(data.status);
           playerPos = 0;
 
-          switch(data.status){
-            case 'waiting':
-              // Applying List
-              $('#applyingList').empty();
-              for(var pIdx in data.players){
-                // console.log(data.players[pIdx])
-                $('#applyingList').append(data.players[pIdx].nickname + '(' + data.players[pIdx].playerid + ')' + ',');
-                if(cId == data.players[pIdx].playerid){
-                  playerPos = pIdx;
-                }
-              }
-              break;
+          $('#applyingList').empty();
+          for(var pIdx in data.players){
+            // console.log(data.players[pIdx])
+            $('#applyingList').append(data.players[pIdx].nickname + '(' + data.players[pIdx].playerid + ')' + ',');
+            if(cId == data.players[pIdx].playerid){
+              playerPos = pIdx;
+            }
+          }
 
+          switch(data.status){
             case 'started':
               $('#sec2').show()
               // route List
@@ -219,8 +218,15 @@
               for(var rIdx in data.routelist){
                 $('#gamecards').append(data.routelist[rIdx].nickname + ': ' + data.cardnames[data.routelist[rIdx].holdcard] + '<br/>');
               }
+              // console.log(data.players[playerPos].lose)
+              // console.log(playerPos)
+              if(data.players[playerPos].lose){
+                $("#result_lose").dialog();
+              }else{
+                $("#result_win").dialog();
+              }
 
-              console.log(data.coyote);
+              // console.log(data.coyote);
               $('#coyoteflg').text('Coyote!!');
               break;
           }
@@ -233,5 +239,11 @@
     }
 
     </script>
+    <div id='result_win' style='display:none' title="you're">
+      win
+    </div>
+    <div id='result_lose' style='display:none' title="you're">
+      lose
+    </div>
   </body>
 </html>

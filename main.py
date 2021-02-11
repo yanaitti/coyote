@@ -19,6 +19,10 @@ def get_locale():
 
 
 '''
+# TODO:
+- To understand the victory or defeat
+- Reuse of exists cards
+
 カード枚数：35枚
 14種類
 　20     0
@@ -36,9 +40,9 @@ def get_locale():
 　MAX→0  34
 　?（今回は対応しない）
 '''
-cardnames = ['20', '15', '15', '10', '10', '10', '5', '5', '5', '5'
- ,'4', '4', '4', '4', '3', '3', '3', '3', '2', '2', '2', '2'
- ,'1', '1', '1', '1', '0', '0', '0', '0', '-5', '-5', '-10'
+cardnames = [20, 15, 15, 10, 10, 10, 5, 5, 5, 5
+ ,4, 4, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2
+ ,1, 1, 1, 1, 0, 0, 0, 0, -5, -5, -10
  , 'x2', 'MAX→0']
 
 
@@ -63,6 +67,7 @@ def create_game(nickname):
         'routeidx': 0,
         'stocks': list(range(0, 35)),
         'coyote': False,
+        'score': 0,
         'cardnames': cardnames,
         'players': []}
     player = {}
@@ -118,6 +123,9 @@ def start_game(gameid):
     game = cache.get(gameid)
     game['status'] = 'started'
     game['answer'] = 0
+    game_score_list = []
+    tmp = []
+    game_score = 0
 
     # playerids = [player['playerid'] for player in game['players']]
     routelist = copy.copy(game['players'])
@@ -128,8 +136,28 @@ def start_game(gameid):
 
     for player in players:
         if len(game['stocks']) == 0:
+            # if count of all cards is not enogh less than count of players, there has to be refill it.
             game['stocks'] = list(range(0, 35))
-        player['holdcard'] = game['stocks'].pop(random.randint(0, len(game['stocks']) - 1))
+        score = game['stocks'].pop(random.randint(0, len(game['stocks']) - 1))
+        game_score_list.append(cardnames[score])
+        player['holdcard'] = score
+        player['lose'] = False
+
+    # make numeric list for calculate score
+    tmp = [i for i in game_score_list if type(i) is int]
+
+    if 'MAX→0' in game_score_list:
+        max_list = [i for i, v in enumerate(tmp) if v == max(tmp)]
+        for i in max_list:
+            tmp[i] = 0
+        game_score_list.pop(game_score_list.index('MAX→0'))
+
+    game_score = sum(tmp)
+
+    if 'x2' in game_score_list:
+        game_score *= 2
+
+    game['score'] = game_score
 
     cache.set(gameid, game)
     return json.dumps(game['routelist'])
@@ -148,12 +176,20 @@ def setcard_game(gameid, clientid, answer):
 
 
 # coyote
-@app.route('/<gameid>/coyote')
-def coyote(gameid):
+@app.route('/<gameid>/<clientid>/coyote')
+def coyote(gameid, clientid):
     game = cache.get(gameid)
 
     game['status'] = 'end'
     game['coyote'] = True
+
+    # logic of calculate numbers
+    print(clientid)
+    if game['score'] < game['answer']:
+        game['players'][game['routeidx']-1]['lose'] = True
+    else:
+        player = [_player for _player in game['players'] if _player['playerid'] == clientid][0]
+        player['lose'] = True
 
     cache.set(gameid, game)
     return 'ok'
