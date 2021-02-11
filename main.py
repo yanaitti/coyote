@@ -186,7 +186,7 @@ def coyote(gameid, clientid):
     # logic of calculate numbers
     print(clientid)
     if game['score'] < game['answer']:
-        game['players'][game['routeidx']-1]['lose'] = True
+        game['players'][game['routeidx']-2]['lose'] = True
     else:
         player = [_player for _player in game['players'] if _player['playerid'] == clientid][0]
         player['lose'] = True

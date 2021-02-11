@@ -9,6 +9,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
   </head>
   <body>
+    <div id='result_win' style='display:none' title="you're">
+      win
+    </div>
+    <div id='result_lose' style='display:none' title="you're">
+      lose
+    </div>
     このゲームは２～１０人用となっています。<br/>
     <div id='app2'>
       <input id="cName_inp" placeholder="ニックネームを入力してください"><br/>
@@ -183,7 +189,7 @@
 
           switch(data.status){
             case 'started':
-              $('#sec2').show()
+              $('#sec2').show();
               // route List
               $('#routeList').empty();
               $('#gamecards').empty();
@@ -239,11 +245,5 @@
     }
 
     </script>
-    <div id='result_win' style='display:none' title="you're">
-      win
-    </div>
-    <div id='result_lose' style='display:none' title="you're">
-      lose
-    </div>
   </body>
 </html>
