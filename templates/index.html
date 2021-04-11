@@ -19,12 +19,20 @@
     <div id='app2'>
       <input id="cName_inp" placeholder="ニックネームを入力してください"><br/>
       <br/>
+      {% if gameid %}
+      {% else %}
       <button id='createGame'>ゲームを作る(Make a Game)</button><br/>
       Game ID: <span id='gId'></span><br/>
+      <input type='text' id='uriWgId' /><input type='button' id='clickCopy' value='copy'><br/>
+      {% endif %}
       Game Status: <span id='gStatus'></span><br/>
       <hr/>
       <button id="joinGame">ゲームに参加する(Join the Game)</button><br/>
+      {% if gameid %}
+      <input type='hidden' id="gId_inp" value='{{ gameid }}'><br/>
+      {% else %}
       <input id="gId_inp" placeholder="GameIDを入力してください"><br/>
+      {% endif %}
       Your ID: <span id='cId'></span><br/>
       Your Name: <span id='cName'></span><br/>
       <hr/>
@@ -67,10 +75,20 @@
       var gId = '';
       var cId = '';
 
+      $('#clickCopy').click(function(){
+        var text = $('#uriWgId').val();
+        var clipboard = $('<textarea></textarea>');
+        clipboard.text(text);
+        $('body').append(clipboard);
+        clipboard.select();
+        document.execCommand('copy');
+        clipboard.remove();
+      });
+
       // Create Game
       $('#createGame').click(function() {
         $('#message').empty();
-        $.ajax('create' + '/' + $('#cName_inp').val(),
+        $.ajax('/create' + '/' + $('#cName_inp').val(),
           {
             type: 'get',
           }
@@ -80,6 +98,7 @@
           $('#cId').text(data);
           $('#cName').text($('#cName_inp').val());
           $('#gStatus').text('waiting');
+          $('#uriWgId').val(location.href + data + '/join');
           gId = data;
           cId = data;
           $('#sec1').show();
@@ -93,7 +112,7 @@
       // Join Game
       $('#joinGame').click(function() {
         $('#message').empty();
-        $.ajax($('#gId_inp').val() + '/join/' + $('#cName_inp').val(),
+        $.ajax('/' + $('#gId_inp').val() + '/join/' + $('#cName_inp').val(),
           {
             type: 'get',
           }
@@ -115,7 +134,7 @@
       // Start Game
       $('#startGame').click(function() {
         $('#message').empty();
-        $.getJSON(gId + '/start',
+        $.getJSON('/' + gId + '/start',
           {
             type: 'get',
           }
@@ -132,7 +151,7 @@
       $('#answer').click(function() {
         $('#message').empty();
         // put your card
-        $.ajax(gId + '/' + cId + '/set/' + $('#cardNum_inp').val(),
+        $.ajax('/' + gId + '/' + cId + '/set/' + $('#cardNum_inp').val(),
           {
             type: 'get',
           }
@@ -150,7 +169,7 @@
       $('#coyote').click(function() {
         $('#message').empty();
         // put your card
-        $.ajax(gId + '/' + cId + '/coyote',
+        $.ajax('/' + gId + '/' + cId + '/coyote',
           {
             type: 'get',
           }
@@ -168,7 +187,7 @@
       setTimeout(function(){
         $('#message').empty();
         // all status
-        $.getJSON(gId + '/status',
+        $.getJSON('/' + gId + '/status',
           {
             type: 'get',
           }
