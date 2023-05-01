@@ -1,6 +1,6 @@
 cache==1.0.3
 click==7.1.2
-Flask==1.1.2
+Flask==2.3.2
 Flask-Caching==1.8.0
 itsdangerous==1.1.0
 Jinja2==2.11.3
